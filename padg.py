@@ -28,10 +28,28 @@ def count_players_currently_in_event(assignments, groups, event):
                        for x in assignments if x['assignment'] == event['id']]
     return sum([x['size'] for x in groups if x['id'] in assigned_groups])
 
-def count_unassigned_players(assignemnts, groups):
+def count_unassigned_players(assignments, groups):
     unassigned_groups = [x['id']
-                       for x in groups if x['assignment'] == -1]
+                       for x in assignments if x['assignment'] == -1]
     return sum([x['size'] for x in groups if x['id'] in unassigned_groups])
+
+def update_groups_and_events_after_assignment(assignments, assignment_id, groups_to_be_assigned, events):
+    assignment_inds = [i for i,x in enumerate(assignments) if x['assignment'] in [100]]
+
+    group_ids = [x['id'] for x in groups_to_be_assigned]
+
+    # Update assignments
+    for i in assignment_inds:
+        assignments[i]['assignment'] = assignment_id
+
+    # Remove the groups from every other events
+
+    for event in events:
+        if event['id'] is not assignment_id:
+            event['groups'] = list(filter(lambda x: x not in group_ids , event['groups']))
+
+    return assignments, events
+    
 
 def padg(input):
     groups, events, gain_list, update_list = input
@@ -84,15 +102,35 @@ def padg(input):
                 #  where we try to place
                 if current_num_players_in_event == 0:
                     # no players currently in the event
-                    if deficit + (current_event['min'] - current_group['size'] < current_num_unassigned_players):
+                    if deficit + (current_event['min'] - current_group['size']) < current_num_unassigned_players \
+                        and current_event['id'] not in phantom_events:
                         # Assigning current_group to current_event does not increase deficit over critical limit
-
-                        if current_event['id'] not in phantom_events:
-                            # No players yet in this event. Push first to phantom events.
+                        # And no players yet in this event. Push first to phantom events.
                             phantom_events.push(current_event['id'])
+                        # else the event is already a phantom event
+                        # Phantom events are checked below and they can become real events
+                        
+                elif current_event[id] in phantom_events:
+                    # Event has players no need to put it in phantom events
+                    deficit = deficit - current_group['size']
 
-                        
-                        
+            # Next we put the group to the event since there is place for it
+            events[event_ind]['groups'].push(current_group['id'])
+
+            # No check if the putting the current group to this event pushed to event to have minimum number of players
+            # and thus not being a phantom event anymore
+
+            if current_num_players_in_event + current_group['size'] >= current_event['min']\
+                and current_event['id'] in phantom_events:
+
+                # This event was a phantom event but is not anymore
+
+                assignments[assignment_ind]['assignment'] = current_event['id']
+
+                # Update the assignment also for the other groups
+
+
+
                 #     if (assignment[assignmentInd].assignment === -1
                 #       && countPlayersInEvent(groups, events, listElement.event) + listElement.size
                 #         <= events[eventInd].max) {
@@ -101,24 +139,8 @@ def padg(input):
                 #       // const playersBefore =
                 #       if (countPlayersInEvent(groups, events, listElement.event) === 0) {
                 #         // no players in this event
-
-                #         if (deficit + (events[eventInd].min - listElement.size) < unassignedGroups.countPlayers()) {
-                #           // adding listElement to this event does not decrease deficit over critical size
-                #           // since event is not yet real event add it to P
-                #           // add to deficit how much space was left over in this event and update deficit
-                #           deficit += (events[eventInd].min - listElement.size)
-                #           if (phantomEvents.includesEvent(events[eventInd]) === 0) {
-                #             const newPEntry = {
-                #               id: events[eventInd].id,
-                #               min: events[eventInd].min,
-                #               max: events[eventInd].max,
-                #             }
-                #             phantomEvents.createEntry(newPEntry)
-                #           }
-                #         } else {
-                #           // eslint-disable-next-line no-continue
-                #           continue
-                #         }
+                #       .... there was somthing here...
+                #
                 #       } else if (phantomEvents.includesEvent(events[eventInd]) === 1) {
                 #         // event has players, decrease deficit
                 #         deficit -= listElement.size
