@@ -4,8 +4,8 @@ Python implementation of [eventassigner-js](https://github.com/Altesmi/eventassi
 
 ## Work in progress
 
-- [ ] padg
-- [ ] random eventassigner
+- [x] padg
+- [x] random eventassigner
 - [ ] Main function to run assignment
 - [ ] unit testing
 - [ ] Test with [Ropecon data](]https://github.com/ropekonsti/ropecon-2022/)

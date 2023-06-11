@@ -1,5 +1,5 @@
 import pytest
-from utils import count_players_in_event
+from ..utils import count_players_in_event
 
 def test_count_players_in_event():
     groups = [
@@ -13,7 +13,8 @@ def test_count_players_in_event():
         {"id": 300, "groups": []},
     ]
 
-    assert count_players_in_event(groups, events, 100) == 8
-    assert count_players_in_event(groups, events, 200) == 7
-    assert count_players_in_event(groups, events, 300) == 0
-    assert count_players_in_event(groups, events, 400) == 0
+    assert count_players_in_event(groups, events[0]) == 8
+    assert count_players_in_event(groups, events[1]) == 7
+    assert count_players_in_event(groups, events[2]) == 0
+    assert count_players_in_event(groups, None) == 0
+    assert count_players_in_event(groups, {'id': 100}) == 0
